@@ -1,134 +1,122 @@
-# Scenario 3: Spark on k8s
+# iris
 
-### Environment setup
-Kedro PySpark / Iris
-https://github.com/quantumblacklabs/kedro-starter-pyspark-iris
+## Overview
+
+This is your new Kedro project, which was generated using `Kedro 0.18.2`.
+
+Take a look at the [Kedro documentation](https://kedro.readthedocs.io) to get started.
+
+## Rules and guidelines
+
+In order to get the best out of the template:
+
+* Don't remove any lines from the `.gitignore` file we provide
+* Make sure your results can be reproduced by following a [data engineering convention](https://kedro.readthedocs.io/en/stable/faq/faq.html#what-is-data-engineering-convention)
+* Don't commit data to your repository
+* Don't commit any credentials or your local configuration to your repository. Keep all your credentials and local configuration in `conf/local/`
+
+## How to install dependencies
+
+Declare any dependencies in `src/requirements.txt` for `pip` installation and `src/environment.yml` for `conda` installation.
+
+To install them, run:
 
 ```
-# Create a directory for your project
-mkdir workshop
-
-# Install the virtualenv package  
-pip install virtualenv 
-
-# Create the virtualenv with the specific Python version
-virtualenv workshop-env --python=python3.9  
-
-# Activate the virtualenv
-source workshop-env/bin/activate
-
-# Go to the working directory
-cd workshop
-```
-
-`conda deactivate` if needed.
-
-### Install Kedro
-Note: remember use Kedro in the specific version: `kedro==0.18.2`
-```
-# Install the Kedro Python package in the virtual environment
-pip install 'kedro==0.18.2'
-```
-
-### Create new project
-```
-kedro new --starter=pyspark-iris
-```
-
-### Install project dependencies
-Please install the project dependencies, defined in the `src/requirements.txt` file.  
-Note: in the future you’ll add new Python packages there.
-
-```  
-# Make sure you’re in your project’s main folder
-cd iris
-
-# Add the following dependencies in src/requirements.txt
-kedro-docker==0.3.0
-pyspark==3.2.2
-
-# Install project dependencies
 pip install -r src/requirements.txt
 ```
 
-### Run pipeline locally
+## How to run your Kedro pipeline
+
+You can run your Kedro project with:
+
 ```
 kedro run
-# exit with error
 ```
 
-### Prepare Docker image
+## How to test your Kedro project
 
-Initialize plugin. It will add `Dockerfile` and `.dockerignore` files:
-```
-kedro docker init
-```
-
-Adjust `.dockerignore `
-```
-# Add this line to include the input file inside Docker container
-# In other scenarios it will be optional if you'll read input data from external storage, i.e. GCS
-
-!data/01_raw
-```
-
-Adjust `Dockerfile `
+Have a look at the file `src/tests/test_run.py` for instructions on how to write your tests. You can run your tests as follows:
 
 ```
-ARG BASE_IMAGE=python:3.9-buster
-
-FROM $BASE_IMAGE
-
-# overwrite default Dataproc PYSPARK_PYTHON path
-ENV PYSPARK_PYTHON /usr/local/bin/python
-
-ENV SPARK_EXTRA_CLASSPATH /usr/local/lib/python3.9/site-packages/pyspark/jars/*
-
-
-# install project requirements
-COPY src/requirements.txt /tmp/requirements.txt
-RUN pip install -r /tmp/requirements.txt && rm -f /tmp/requirements.txt
-
-# (Required) Install utilities required by Spark scripts.
-RUN apt update && apt install -y procps tini openjdk-11-jre-headless
-
-# add kedro user
-ARG KEDRO_UID=999
-ARG KEDRO_GID=0
-
-RUN groupadd -f -g ${KEDRO_GID} kedro_group && \
-
-useradd -d /home/kedro -s /bin/bash -g ${KEDRO_GID} -u ${KEDRO_UID} kedro
-
-# (Required) Create the 'spark' group/user.
-# The GID and UID must be 1099. Home directory is required.
-RUN groupadd -g 1099 spark
-RUN useradd -u 1099 -g 1099 -d /home/spark -m spark
-#USER spark
-
-# copy the whole project except what is in .dockerignore
-WORKDIR /home/kedro
-
-COPY . .
-
-RUN chown -R kedro:${KEDRO_GID} /home/kedro
-
-USER kedro
-
-RUN chmod -R a+w /home/kedro
-
-EXPOSE 8888
-
-CMD ["kedro", "run"]
+kedro test
 ```
 
-Build docker container
+To configure the coverage threshold, go to the `.coveragerc` file.
+
+## Project dependencies
+
+To generate or update the dependency requirements for your project:
 
 ```
-docker build \
-	-t gcr.io/gid-ml-ops-sandbox/pyspark-k8s:20221006 \
-	.
-
-docker push gcr.io/gid-ml-ops-sandbox/pyspark-k8s:20221006
+kedro build-reqs
 ```
 
+This will `pip-compile` the contents of `src/requirements.txt` into a new file `src/requirements.lock`. You can see the output of the resolution by opening `src/requirements.lock`.
+
+After this, if you'd like to update your project requirements, please update `src/requirements.txt` and re-run `kedro build-reqs`.
+
+[Further information about project dependencies](https://kedro.readthedocs.io/en/stable/kedro_project_setup/dependencies.html#project-specific-dependencies)
+
+## How to work with Kedro and notebooks
+
+> Note: Using `kedro jupyter` or `kedro ipython` to run your notebook provides these variables in scope: `catalog`, `context`, `pipelines` and `session`.
+>
+> Jupyter, JupyterLab, and IPython are already included in the project requirements by default, so once you have run `pip install -r src/requirements.txt` you will not need to take any extra steps before you use them.
+
+### Jupyter
+To use Jupyter notebooks in your Kedro project, you need to install Jupyter:
+
+```
+pip install jupyter
+```
+
+After installing Jupyter, you can start a local notebook server:
+
+```
+kedro jupyter notebook
+```
+
+### JupyterLab
+To use JupyterLab, you need to install it:
+
+```
+pip install jupyterlab
+```
+
+You can also start JupyterLab:
+
+```
+kedro jupyter lab
+```
+
+### IPython
+And if you want to run an IPython session:
+
+```
+kedro ipython
+```
+
+### How to convert notebook cells to nodes in a Kedro project
+You can move notebook code over into a Kedro project structure using a mixture of [cell tagging](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#release-5-0-0) and Kedro CLI commands.
+
+By adding the `node` tag to a cell and running the command below, the cell's source code will be copied over to a Python file within `src/<package_name>/nodes/`:
+
+```
+kedro jupyter convert <filepath_to_my_notebook>
+```
+> *Note:* The name of the Python file matches the name of the original notebook.
+
+Alternatively, you may want to transform all your notebooks in one go. Run the following command to convert all notebook files found in the project root directory and under any of its sub-folders:
+
+```
+kedro jupyter convert --all
+```
+
+### How to ignore notebook output cells in `git`
+To automatically strip out all output cell contents before committing to `git`, you can run `kedro activate-nbstripout`. This will add a hook in `.git/config` which will run `nbstripout` before anything is committed to `git`.
+
+> *Note:* Your output cells will be retained locally.
+
+## Package your Kedro project
+
+[Further information about building project documentation and packaging your project](https://kedro.readthedocs.io/en/stable/tutorial/package_a_project.html)
