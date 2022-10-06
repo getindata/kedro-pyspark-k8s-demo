@@ -1,0 +1,19 @@
+steps:
+  - id: docker_build
+    name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', '${_ARTIFACT_REGISTRY}/${_GCP_PROJECT_ID}/${_REGISTRY_ID}/${_IMAGE_NAME}:${SHORT_SHA}', '.']
+    timeout: 900s
+  - id: docker_push
+    name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 
+           '${_ARTIFACT_REGISTRY}/${_GCP_PROJECT_ID}/${_REGISTRY_ID}/${_IMAGE_NAME}:${SHORT_SHA}'
+           ]
+    timeout: 900s
+images:
+  - '${_ARTIFACT_REGISTRY}/${_GCP_PROJECT_ID}/${_REGISTRY_ID}/${_IMAGE_NAME}:${SHORT_SHA}'
+timeout: 1200s
+substitutions:
+    _ARTIFACT_REGISTRY: europe-west1-docker.pkg.dev
+    _GCP_PROJECT_ID: gid-ml-ops-sandbox
+    _REGISTRY_ID: kedro-pyspark-k8s-demo             
+    _IMAGE_NAME: kedro-iris
