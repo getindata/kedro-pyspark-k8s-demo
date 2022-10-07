@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kedro-spark-on-k8s
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      serviceAccountName: spark
+      containers:
+      - name: kedro
+        image: &image europe-west1-docker.pkg.dev/gid-ml-ops-sandbox/kedro-pyspark-k8s-demo/kedro-iris:93bf22b
+        command: ["kedro", "run", "-e", "spark-on-k8s"]
+        env:
+        - name: CONTAINER_IMAGE
+          value: *image
+      restartPolicy: Never
+      nodeSelector:
+        node_pool: spark-drivers

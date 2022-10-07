@@ -21,8 +21,13 @@
 
 ## Running the job
 
-TODO
+Adjust the image it in `job.yaml` file and:
 
+    kubectl apply -f job.yaml
+
+## Cleanup
+
+Go to `terraform/` and execute `terraform destroy`.
 
 ## Overview
 
