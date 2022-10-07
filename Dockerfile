@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=python:3.9-buster
+ARG BASE_IMAGE=python:3.9-slim
 
 FROM $BASE_IMAGE
 
@@ -20,14 +20,15 @@ ARG KEDRO_UID=999
 ARG KEDRO_GID=0
 
 RUN groupadd -f -g ${KEDRO_GID} kedro_group && \
-
-useradd -d /home/kedro -s /bin/bash -g ${KEDRO_GID} -u ${KEDRO_UID} kedro
+    useradd -d /home/kedro -s /bin/bash -g ${KEDRO_GID} -u ${KEDRO_UID} kedro
 
 # (Required) Create the 'spark' group/user.
 # The GID and UID must be 1099. Home directory is required.
 RUN groupadd -g 1099 spark
 RUN useradd -u 1099 -g 1099 -d /home/spark -m spark
 #USER spark
+
+COPY scripts/spark-executor-entrypoint.bash /usr/local/bin/executor
 
 # copy the whole project except what is in .dockerignore
 WORKDIR /home/kedro

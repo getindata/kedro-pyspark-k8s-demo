@@ -1,4 +1,6 @@
 """Entry point for running a Kedro pipeline as a Python package."""
+import os
+import socket
 from pathlib import Path
 from typing import Any, Dict, Union
 
@@ -34,6 +36,11 @@ class ProjectContext(KedroContext):
         # Load the spark configuration in spark.yaml using the config loader
         parameters = self.config_loader.get("spark*", "spark*/**")
         spark_conf = SparkConf().setAll(parameters.items())
+
+        if 'CONTAINER_IMAGE' in os.environ:
+            spark_conf.set('spark.kubernetes.container.image', os.environ['CONTAINER_IMAGE'])
+            spark_conf.set("spark.driver.host", socket.gethostbyname(socket.gethostname()))
+            spark_conf.set('spark.kubernetes.driver.pod.name', socket.gethostname())
 
         # Initialise the spark session
         spark_session_conf = (

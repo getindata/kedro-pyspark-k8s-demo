@@ -52,48 +52,6 @@ example_iris_data:
   save_args:
     header: True
 
-# We need to set mode to 'overwrite' in save_args so when saving the dataset it is replaced each time it is run
-# for all SparkDataSets.
-X_train@pyspark:
-  type: spark.SparkDataSet
-  filepath: data/02_intermediate/X_train.parquet
-  save_args:
-    mode: overwrite
-
-X_train@pandas:
-  type: pandas.ParquetDataSet
-  filepath: data/02_intermediate/X_train.parquet
-
-X_test@pyspark:
-  type: spark.SparkDataSet
-  filepath: data/02_intermediate/X_test.parquet
-  save_args:
-    mode: overwrite
-
-X_test@pandas:
-  type: pandas.ParquetDataSet
-  filepath: data/02_intermediate/X_test.parquet
-
-y_train@pyspark:
-  type: spark.SparkDataSet
-  filepath: data/02_intermediate/y_train.parquet
-  save_args:
-    mode: overwrite
-
-y_train@pandas:
-  type: pandas.ParquetDataSet
-  filepath: data/02_intermediate/y_train.parquet
-
-y_test@pyspark:
-  type: spark.SparkDataSet
-  filepath: data/02_intermediate/y_test.parquet
-  save_args:
-    mode: overwrite
-
-y_test@pandas:
-  type: pandas.ParquetDataSet
-  filepath: data/02_intermediate/y_test.parquet
-
 # This is an example how to use `MemoryDataSet` with Spark objects that aren't `DataFrame`'s.
 # In particular, the `assign` copy mode ensures that the `MemoryDataSet` will be assigned
 # the Spark object itself, not a deepcopy version of it, since deepcopy doesn't work with

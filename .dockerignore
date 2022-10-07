@@ -1,6 +1,12 @@
 ##########################
 # Kedro PROJECT
 
+# ignore all terraform stuff
+terraform
+
+# and git
+.git
+
 # ignore Dockerfile and .dockerignore
 Dockerfile
 .dockerignore
