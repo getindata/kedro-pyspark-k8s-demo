@@ -4,6 +4,7 @@ generated using Kedro 0.18.2
 """
 
 import logging
+import time
 from typing import Dict, Tuple
 
 import numpy as np
@@ -31,7 +32,7 @@ def split_data(data: DataFrame, parameters: Dict) -> Tuple:
     y_train = data_train.select(parameters["target_column"])
     y_test = data_test.select(parameters["target_column"])
 
-    return X_train, X_test, y_train, y_test
+    return X_train.toPandas(), X_test.toPandas(), y_train.toPandas(), y_test.toPandas()
 
 
 def make_predictions(
@@ -47,6 +48,9 @@ def make_predictions(
     Returns:
         y_pred: Prediction of the target variable.
     """
+    logger = logging.getLogger(__name__)
+    logger.info("Sleeping for 60 seconds so we can see spark executors shut down...")
+    time.sleep(60)
 
     X_train_numpy = X_train.to_numpy()
     X_test_numpy = X_test.to_numpy()

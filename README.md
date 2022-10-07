@@ -1,4 +1,28 @@
-# iris
+# Running Kedro with pyspark session on kubernetes
+
+## Infrastructure setup
+
+1. Go to `terraform/`, adjust the `tfvars` file and plan the cluster setup:
+
+        terraform plan -var-file=demo.tfvars
+
+2. If the plan looks OK, apply it:
+
+        terraform apply -var-file=demo.tfvars
+
+3. When the cluster is creted, configure kubecrl configuration:
+
+        gcloud container clusters get-credentials kedro-with-spark-on-k8s --zone europe-west1-b --project gid-ml-ops-sandbox
+
+4. Finally, create a service account for spark with edit role (spark driver needs rights to spawn new pods within the namespace):
+
+        kubectl create serviceaccount spark
+        kubectl create clusterrolebinding spark-role --clusterrole=edit --serviceaccount=default:spark --namespace=default
+
+## Running the job
+
+TODO
+
 
 ## Overview
 
